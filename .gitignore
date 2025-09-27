@@ -1,0 +1,21 @@
+# Compiled object files
+*.o
+*.obj
+
+# Executables
+*.out
+*.exe
+*.out
+*.app
+
+# Debug files
+*.dSYM/
+*.pdb
+
+# VS Code settings
+.vscode/
+*.code-workspace
+
+# Linux/Mac temp files
+*.swp
+*~
