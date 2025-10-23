@@ -9,8 +9,9 @@ int main()
     int fd;
     printf("enter file name please \n");
     scanf("%19s",name);
+
     printf("enter content please \n");
-    scanf("%99s",content);
+    fgets(content,sizeof(content),stdin);
     
     int lenght = 0 ;
     while(content[lenght]!='\0')
@@ -22,7 +23,6 @@ int main()
     if(fd==-1){
         perror("error creating file");
         return 1 ;
-
     }
     int bytes_wr = write(fd,content,lenght);
     if(bytes_wr==-1)
@@ -31,7 +31,6 @@ int main()
 
         close(fd);
         return 1 ;
-
     }
     close(fd);
 

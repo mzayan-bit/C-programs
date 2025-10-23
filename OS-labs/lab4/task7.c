@@ -16,7 +16,7 @@ int main()
     scanf("%d",&n);
     books book[n];
 
-    for(int i = 0 ; i <n;i++){
+    for(int i = 0 ; i<n;i++){
         printf("book id %d",i+1);
         printf("enter no.of pages of book \n ");
         scanf("%d",&book[i].pages);
