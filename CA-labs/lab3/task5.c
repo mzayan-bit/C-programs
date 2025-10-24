@@ -1,64 +1,79 @@
 #include <stdio.h>
 #include <omp.h>
-#define N 10000
+#include <time.h>
 
 int main() {
-    int A[N], B[N], C[N];
-    long long sum = 0, prod = 1, max;
-    int i;
-
-    for (i = 0; i < N; i++) {
-        A[i] = i + 1;
-        B[i] = 2;
-        C[i] = N - i;
+    int A[10], B[10], C[10];
+    for (int i = 0; i < 10; i++) {
+        A[i] = i;
+        B[i] = i * 2;
+        C[i]=i*3;
     }
 
-    // Sequential
-    double s = omp_get_wtime();
-    sum = 0;
-    for (i = 0; i < N; i++) sum += A[i];
-
-    prod = 1;
-    for (i = 0; i < N; i++) prod *= B[i];  
-
-    max = C[0];
-    for (i = 1; i < N; i++)
-        if (C[i] > max) max = C[i];
-
-    double e = omp_get_wtime();
-    printf("seq %f\n", e - s);
-    printf("sum : %lld product : %lld max : %lld\n", sum, prod, max);
-
+    clock_t begin = clock();
+    int sum=0;
+    int product;
+    int max=-9999999;
+    for (int i = 0; i < 10; i++) {
+        sum=sum+A[i];
+    }
+    for (int i = 0; i < 10; i++) {
+        product=product*A[i];
+    }
+    for (int i = 0; i < 10; i++) {
+        if(C[i]>max)
+        {
+            max=C[i];
+        }
+    }
+    clock_t end = clock();
+    double time_sequential = (double)(end - begin) / CLOCKS_PER_SEC;
     
-    sum = 0; prod = 1; max = C[0];
-    double ps = omp_get_wtime();
+    printf("sum=%d\n",sum);
+    printf("product=%d\n",product);
+    printf("max is %d\n",max);
+    printf("Sequential Time: %f seconds\n\n", time_sequential);
 
-    #pragma omp parallel sections
+    double start_time=omp_get_wtime();
+    int psum=0;
+    int pproduct;
+    int pmax=-999999;
+    #pragma omp parallel
     {
-        #pragma omp section
-        {
-            long long temp = 0;
-            for (i = 0; i < N; i++) temp += A[i];
-            sum = temp;
-        }
-        #pragma omp section
-        {
-            long long temp = 1;
-            for (i = 0; i < N; i++) temp *= B[i]; 
-            prod = temp;
-        }
-        #pragma omp section
-        {
-            long long temp = C[0];
-            for (i = 1; i < N; i++)
-                if (C[i] > temp) temp = C[i];
-            max = temp;
-        }
+       #pragma omp sections
+       {
+            #pragma omp section
+            {
+                for (int i = 0; i < 10; i++) {
+                    psum=psum+A[i];
+                }
+            }
+            #pragma omp section
+            {
+                    for (int i = 0; i < 10; i++) {
+                        pproduct=pproduct*A[i];
+                    }
+            }
+            #pragma omp section
+            {
+                    for (int i = 0; i < 10; i++) {
+                        if(C[i]>pmax)
+                        {
+                            pmax=C[i];
+                        }
+                    }
+            }
+       }
     }
 
-    double pe = omp_get_wtime();
-    printf("par %f\n", pe - ps);
-    printf("sum : %lld product : %lld max : %lld\n", sum, prod, max);
-
+    double end_time = omp_get_wtime();
+    printf("parallel sum=%d\n",psum);
+    printf("parallel product=%d\n",pproduct);
+    printf("parallel  max is %d\n",pmax);
+    printf("Parallel Time: %f seconds\n\n", end_time - start_time);
+    
     return 0;
+
 }
+
+

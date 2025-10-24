@@ -1,29 +1,21 @@
-#include <stdio.h>
-#include <omp.h>
-#include <time.h>
+#include<stdio.h>
+#include<omp.h>
 
-int main() {
-    int thread_counts[] = {2, 4, 8};
-    int num_tests = 3;
 
-    for (int i = 0; i < num_tests; i++) {
-        int nthreads = thread_counts[i];
-        omp_set_num_threads(nthreads);
-
-        clock_t start = clock();
-
+int main()
+{
+    int thread_c[]={2,4,8};
+    int n =3;
+    for(int i = 0 ; i < n ;i++)
+    {
+        int num_of_threads=thread_c[i];
+        omp_set_num_threads(num_of_threads);
+        double start = omp_get_wtime();
         #pragma omp parallel
         {
-            int tid = omp_get_thread_num();
-            int total = omp_get_num_threads();
-            printf("Hello from thread %d of %d\n", tid, total);
+            printf("Hello from thread %d of %d threads \n",omp_get_thread_num(),omp_get_num_threads());
         }
-
-        clock_t end = clock();
-        double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
-        printf("Time taken with %d threads: %f seconds\n\n", nthreads, time_taken);
+        double end=omp_get_wtime();
+        printf("Time taken by %d threads is %f\n",num_of_threads,end-start);
     }
-
-    return 0;
 }
-

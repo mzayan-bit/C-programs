@@ -1,33 +1,29 @@
 #include<stdio.h>
-#include<time.h>
 #include<omp.h>
+#include<time.h>
 
 int main()
 {
-   int sum=0;
-   clock_t begin = clock();
-   
-   for (int i = 1 ; i<1000000;i++)
+   int seq_sum=0;
+   clock_t start=clock();
+   for(int i =0;i<1000000;i++)
    {
-   	sum = sum + i ;
+      seq_sum=seq_sum+i;
    }
    clock_t end = clock();
-   double time = (double)(end-begin)/CLOCKS_PER_SEC;
+   double time_spent=(double)(end-start)/CLOCKS_PER_SEC;
+   printf("Seq sum is %d\n",seq_sum);
+   printf("Time for sequential is %f\n",time_spent);
 
-   printf("Sequential time of the clock is %f \n",time);
-   printf("Final sum of seq is  %d \n",sum );
+   int par_sum=0;
+   double starts=omp_get_wtime();
+   #pragma omp parallel for reduction(+:par_sum)
+      for(int i =0;i<1000000;i++)
+      {
+      par_sum=par_sum+i;
+      }
    
-   int sum2 = 0 ;
-   clock_t begin2 = clock();
-   
-   #pragma omp parallel for reduction(+:sum2)
-	for (int i=1; i<=1000000; i++) {
-		sum2 += i;
-	}
-	clock_t end2 = clock();
-
-	printf("Sum = %d\n", sum2);
-	double time2 = (double)(end2-begin2)/CLOCKS_PER_SEC;
-	printf("Parallel  time of the clock is %f \n",time2);
+   double ends=omp_get_wtime();
+   printf("parallel sum is %d\n",par_sum);
+   printf("parallel time is %f\n",ends-starts);
 }
-

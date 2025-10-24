@@ -17,7 +17,7 @@ int main() {
     double time_sequential = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("Sequential Time: %f seconds\n\n", time_sequential);
 
-    int thread_counts[] = {2, 4, 0}; 
+    int thread_counts[] = {0,2, 4}; 
     int num_tests = 3;
 
     for (int t = 0; t < num_tests; t++) {
