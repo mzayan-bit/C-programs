@@ -1,70 +1,52 @@
-#include<stdio.h>
-#include<pthread.h>
-#include<unistd.h>
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
 
-#define MAX 5 
+int fuel = 0; 
+pthread_mutex_t fuel_lock;
+pthread_cond_t fuel_cond; 
 
-int buffer[MAX];
-int in=0;
-int out=0;
-int count=0;
+void* car(void* arg) {
+    pthread_mutex_lock(&fuel_lock);
 
-pthread_cond_t not_full;
-pthread_cond_t not_empty;
-pthread_mutex_t lock;
-
-void *consumer(void *c)
-{
-    for(int i = 0 ; i < 10 ; i ++)
-    {
-        sleep(1);
-        pthread_mutex_lock(&lock);
-        while(count==0)
-        {
-            pthread_cond_wait(&not_full,&lock);
-        }
-        int item =buffer[out];
-        out =(out+1)%MAX;
-        count --;
-        printf("consumer took %d count = %d\n",item,count);
-        pthread_cond_signal(&not_empty);
-        pthread_mutex_unlock(&lock);
+    while (fuel < 40) {
+        printf("Car: Not enough fuel (%d). Waiting...\n", fuel);
+        pthread_cond_wait(&fuel_cond, &fuel_lock);
     }
-}
-
-void *producer(void *c)
-{
-    for(int i = 0 ; i < 10 ; i ++)
-    {
-        sleep(1);
-        pthread_mutex_lock(&lock);
-        while(count==MAX)
-        {
-            pthread_cond_wait(&not_empty,&lock);
-        }
-        buffer[in]=i;
-        int item =buffer[in];
-        in=(in+1)%MAX;
-        count ++;
-        printf("producer put %d count = %d\n",item,count);
-        pthread_cond_signal(&not_full);
-        pthread_mutex_unlock(&lock);
-    }
-}
-
-int main()
-{
-    pthread_mutex_init(&lock,NULL);
-    pthread_cond_init(&not_full,NULL);
-    pthread_cond_init(&not_empty,NULL);
-
-    pthread_t p1,p2;
+    printf("Car: Tank full (%d)! Driving away.\n", fuel);
+    fuel -= 40;
     
-    pthread_create(&p1,NULL,producer,NULL);
-    pthread_create(&p2,NULL,consumer,NULL);
+    pthread_mutex_unlock(&fuel_lock);
+    return NULL;
+}
 
-    pthread_join(p1,NULL);
-    pthread_join(p2,NULL);
+void* gas_station(void* arg) {
+    for (int i=0; i<5; i++) {
+        sleep(1);
+        pthread_mutex_lock(&fuel_lock);
+        
+        fuel += 10;
+        printf("Station: Added 10 fuel. Total: %d\n", fuel);
+        
+        pthread_cond_signal(&fuel_cond);
+        
+        pthread_mutex_unlock(&fuel_lock);
+    }
+    return NULL;
+}
 
-    pthread_mutex_destroy(&lock);
+int main() {
+    pthread_t t1, t2;
+    pthread_mutex_init(&fuel_lock, NULL);
+    pthread_cond_init(&fuel_cond, NULL); 
+
+    pthread_create(&t1, NULL, car, NULL);
+    pthread_create(&t2, NULL, gas_station, NULL);
+
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+
+    pthread_mutex_destroy(&fuel_lock);
+    pthread_cond_destroy(&fuel_cond);
+    return 0;
 }
